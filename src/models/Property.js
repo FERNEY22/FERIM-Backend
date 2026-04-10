@@ -56,6 +56,6 @@ const propertySchema = new mongoose.Schema({
 });
 
 // Opcional: Crear un índice geoespacial para búsquedas por ubicación
-// propertySchema.index({ "location": "2dsphere" });
+propertySchema.index({ "location": "2dsphere" });
 
 module.exports = mongoose.model('Property', propertySchema);

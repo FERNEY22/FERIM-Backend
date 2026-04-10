@@ -2,10 +2,10 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config(); // Carga las variables de entorno
 const mongoose = require('mongoose');
-const userRoutes = require('./src/routes/userRoutes'); // Importa las rutas de usuario
+
 
 // Importa la función de conexión a la base de datos (ruta correcta dentro de src)
-const connectDB = require('./src/config/db.js');
+//const connectDB = require('./src/config/db.js'); //cambiado 09 abril hora 853 pm
 
 // IMPORTA las rutas de autenticación (ruta correcta dentro de src)
 const authRoutes = require('./src/routes/authRoutes.js');
@@ -41,7 +41,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 
-app.use('/api/users', userRoutes);
+
 
 // Define el puerto
 const PORT = process.env.PORT || 5000;

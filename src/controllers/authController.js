@@ -24,8 +24,8 @@ const registerUser = async (req, res) => {
     });
 
     // Encriptar la contraseña
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
+    //const salt = await bcrypt.genSalt(10);
+    //user.password = await bcrypt.hash(password, salt);
 
     // Guardar el usuario en la base de datos
     await user.save();
@@ -59,16 +59,17 @@ const loginUser = async (req, res) => {
 
   try {
     // Verificar si el usuario existe
-    let user = await User.findOne({ email });
+    //let user = await User.findOne({ email });
+      let user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(400).json({ msg: 'Credenciales inválidas' });
     }
 
     // Verificar la contraseña
-    //const isMatch = await bcrypt.compare(password, user.password);
-    //if (!isMatch) {
-      //return res.status(400).json({ msg: 'Credenciales inválidas' });
-    //}
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+    return res.status(400).json({ msg: 'Credenciales inválidas' });
+    }
 
     // Generar un token JWT
     const payload = {
