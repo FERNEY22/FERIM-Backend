@@ -87,5 +87,29 @@ router.get('/owner/me', auth, async (req, res) => {
   }
 });
 
+// Ruta para editar una propiedad: PUT /api/properties/:id
+router.put('/:id', auth, async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      return res.status(404).json({ msg: 'Propiedad no encontrada' });
+    }
+    if (property.owner.toString() !== req.user.id) {
+      return res.status(403).json({ msg: 'No autorizado' });
+    }
+    const updated = await Property.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+
+
 // Exporta el router
 module.exports = router;
