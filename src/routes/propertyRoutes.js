@@ -109,7 +109,23 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-
+// Ruta para eliminar una propiedad: DELETE /api/properties/:id
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) {
+      return res.status(404).json({ msg: 'Propiedad no encontrada' });
+    }
+    if (property.owner.toString() !== req.user.id) {
+      return res.status(403).json({ msg: 'No autorizado' });
+    }
+    await Property.findByIdAndDelete(req.params.id);
+    res.json({ msg: 'Propiedad eliminada' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
 
 // Exporta el router
 module.exports = router;
