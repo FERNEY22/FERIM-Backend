@@ -75,5 +75,17 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Ruta para obtener propiedades del propietario autenticado: GET /api/properties/owner/me
+router.get('/owner/me', auth, async (req, res) => {
+  try {
+    const properties = await Property.find({ owner: req.user.id })
+                                    .sort({ createdAt: -1 });
+    res.json(properties);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
 // Exporta el router
 module.exports = router;
