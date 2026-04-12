@@ -1,12 +1,13 @@
 const Property = require('../models/Property'); // Importa el modelo Property
 const User = require('../models/User'); // Importa el modelo User para verificar el propietario
+const { uploadToCloudinary } = require('../middleware/uploadImage');
 
 // Controlador para crear una nueva propiedad: POST /api/properties
 // Requiere autenticación
 // Reemplaza la ruta POST actual por esta versión:
 exports.createProperty = async (req, res) => {
   try {
-    const { title, description, price, type, location, images } = req.body;
+    const { title, description, price, type, location } = req.body;
 
     // Verificar que el usuario autenticado sea propietario
     const user = await User.findById(req.user.id).select('-password');
@@ -16,6 +17,14 @@ exports.createProperty = async (req, res) => {
     if (user.role !== 'propietario') {
       return res.status(403).json({ msg: 'Acceso denegado. Solo propietarios pueden registrar propiedades.' });
     }
+    // Subir imágenes a Cloudinary si se adjuntaron archivos
+    let imageUrls = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await uploadToCloudinary(file.buffer, 'ferim/properties');
+        imageUrls.push(result.secure_url);
+      }
+    }
 
     const newProperty = new Property({
       title,
@@ -23,7 +32,7 @@ exports.createProperty = async (req, res) => {
       price,
       type,
       location,
-      images: images || [],
+      images: imageUrls,
       owner: user.id
     });
 
