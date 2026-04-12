@@ -10,9 +10,11 @@ const {
   deleteProperty
 } = require('../controllers/propertyController'); // Importa el controlador de propiedades
 
+const { upload } = require('../middleware/uploadImage'); // Importa el middleware de subida de imágenes
+
 // Ruta para crear una nueva propiedad: POST /api/properties
 // Requiere autenticación
-router.post('/', auth, createProperty);
+router.post('/', auth, upload.array('images', 5), createProperty);
 
 // Ruta para obtener todas las propiedades: GET /api/properties
 // No requiere autenticación
