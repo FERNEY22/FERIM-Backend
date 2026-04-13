@@ -15,11 +15,10 @@ const { upload } = require('../middleware/uploadImage'); // Importa el middlewar
 // Ruta para crear una nueva propiedad: POST /api/properties
 // Requiere autenticación
 //router.post('/', auth, upload.array('images', 5), createProperty);
-router.post('/', auth, (req, res, next) => {
-  console.log('FILES:', req.files);
-  console.log('BODY:', req.body);
+router.post('/', (req, res, next) => {
+  console.log('CONTENT-TYPE:', req.headers['content-type']);
   next();
-}, upload.array('images', 5), createProperty);
+}, auth, upload.array('images', 5), createProperty);
 
 // Ruta para obtener todas las propiedades: GET /api/properties
 // No requiere autenticación
