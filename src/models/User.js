@@ -36,7 +36,7 @@ const UserSchema = new mongoose.Schema({
 UserSchema.pre('save', async function (next) {
   // Solo encriptar si la contraseña fue modificada (o es nueva)
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
 
   try {

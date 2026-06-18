@@ -4,10 +4,19 @@ const { uploadToCloudinary } = require('../middleware/uploadImage');
 
 // Controlador para crear una nueva propiedad: POST /api/properties
 // Requiere autenticación
-// Reemplaza la ruta POST actual por esta versión:
 exports.createProperty = async (req, res) => {
   try {
-    const { title, description, price, type, location } = req.body;
+    let { title, description, price, type, location } = req.body;
+
+    // Con multipart/form-data (cuando se suben imágenes) 'location' llega como
+    // string JSON; lo parseamos a objeto GeoJSON antes de guardarlo.
+    if (typeof location === 'string') {
+      try {
+        location = JSON.parse(location);
+      } catch (e) {
+        return res.status(400).json({ msg: 'Ubicación inválida' });
+      }
+    }
 
     // Verificar que el usuario autenticado sea propietario
     const user = await User.findById(req.user.id).select('-password');
@@ -17,12 +26,13 @@ exports.createProperty = async (req, res) => {
     if (user.role !== 'propietario') {
       return res.status(403).json({ msg: 'Acceso denegado. Solo propietarios pueden registrar propiedades.' });
     }
+
     // Subir imágenes a Cloudinary si se adjuntaron archivos
-    let imageUrls = [];
+    let images = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const result = await uploadToCloudinary(file.buffer, 'ferim/properties');
-        imageUrls.push(result.secure_url);
+        images.push({ public_id: result.public_id, url: result.secure_url });
       }
     }
 
@@ -32,7 +42,7 @@ exports.createProperty = async (req, res) => {
       price,
       type,
       location,
-      images: imageUrls,
+      images,
       owner: user.id
     });
 
@@ -50,7 +60,7 @@ exports.getAllProperties = async (req, res) => {
   try {
     // Buscar todas las propiedades en la base de datos
     const properties = await Property.find()
-                                    .populate('owner', 'name lastname email') // Popula el campo owner con nombre y email
+                                    .populate('owner', 'name lastname') // Popula el campo owner con nombre y email
                                     .sort({ createdAt: -1 }); // Ordenar por fecha de creación, más recientes primero
 
     res.json(properties); // Devolver la lista de propiedades
@@ -67,7 +77,7 @@ exports.getPropertyById = async (req, res) => {
   try {
     // Buscar la propiedad por su ID
     const property = await Property.findById(req.params.id)
-                                  .populate('owner', 'name lastname email'); // Popula el propietario
+                                  .populate('owner', 'name lastname'); // Popula el propietario
 
     if (!property) {
         return res.status(404).json({ msg: 'Propiedad no encontrada' });

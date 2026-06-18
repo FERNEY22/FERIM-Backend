@@ -12,6 +12,7 @@ const authRoutes = require('./src/routes/authRoutes.js');
 const propertyRoutes = require('./src/routes/propertyRoutes.js');
 const reservationRoutes = require('./src/routes/reservationRoutes.js');
 const maintenanceRoutes = require('./src/routes/maintenanceRoutes.js');
+const chatRoutes = require('./src/routes/chatRoutes.js');
 
 // Inicializa Express
 const app = express();
@@ -34,12 +35,19 @@ app.get('/', (req, res) => {
   res.send('¡Backend de FERIM funcionando!');
 });
 
+// Endpoint de salud para keep-alive (UptimeRobot). No toca la base de datos:
+// responde rápido y barato, solo para evitar que Render free se duerma.
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
 // USA las rutas de autenticación en el servidor
 // Todas las rutas definidas en authRoutes se activarán bajo el prefijo '/api/auth'
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/chats', chatRoutes);
 
 
 
